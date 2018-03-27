@@ -96,6 +96,40 @@ def create_iterators():
     
     return train_loader, val_loader  
   
+def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
+    # switch to train mode
+    model.train()
+
+    meter_loss = tnt.meter.AverageValueMeter()
+    classacc = tnt.meter.ClassErrorMeter(topk=[1, 5], accuracy=True)
+    
+    for batch_idx, (inputs, targets) in enumerate(train_loader):
+        # measure data loading time
+        classacc.reset()
+        meter_loss.reset()
+        timer_train.reset()
+
+        if use_cuda:
+            inputs, targets = inputs.cuda(), targets.cuda(async=True)
+        inputs, targets = torch.autograd.Variable(inputs), torch.autograd.Variable(targets)
+
+        # compute output
+        outputs = model(inputs)
+        loss = criterion(outputs, targets)
+
+        # measure accuracy and record loss
+        classacc.add(outputs.data, targets.data)
+        meter_loss.add(loss.data)
+
+        # compute gradient and do SGD step
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    train_acc = classacc.value()
+    top1, top5 = train_acc[0], train_acc[1]
+    
+  
 best_acc = 0  # best test accuracy
 
 def main():
