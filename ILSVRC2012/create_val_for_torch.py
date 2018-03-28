@@ -20,9 +20,9 @@ def mkdir_p(path):
         else:
             raise
 
-
-datadir = 'val_torch'
-mkdir_p(datadir)
+ori_valdir = 'val'
+new_valdir = 'val_torch'
+mkdir_p(new_valdir)
 
 idx2label = dict()
 
@@ -30,7 +30,7 @@ with open('synset_words.txt', 'r') as f:
     for idx, line in enumerate(f.readlines()):
         label = line.strip().split()[0]
         idx2label[idx] = label
-        path = os.path.join(datadir, label)
+        path = os.path.join(new_valdir, label)
         mkdir_p(path)
 
 with open('val.txt', 'r') as f:
@@ -38,6 +38,6 @@ with open('val.txt', 'r') as f:
         filename, idx = line.strip().split()
         idx = int(idx)
         label = idx2label[idx]
-        src_path = os.path.join('val', filename)
-        dst_path = os.path.join(datadir, label, filename)
+        src_path = os.path.join(ori_valdir, filename)
+        dst_path = os.path.join(new_valdir, label, filename)
         copyfile(src_path, dst_path)
