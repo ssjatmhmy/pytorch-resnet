@@ -132,7 +132,7 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
         
         # measure elapsed time
         end = time.time()
-        print('data_time: {.3f}s, loss: {.4f}, top1: {.2f}, top5: {.2f}'.format(
+        print('data_time: {:.4f}s, loss: {:.4f}, top1: {:.2f}, top5: {:.2f}'.format(
               data_time.avg, losses.avg, top1.avg, top5.avg))
               
 def test(val_loader, model, criterion, epoch, use_cuda):
@@ -167,7 +167,7 @@ def test(val_loader, model, criterion, epoch, use_cuda):
         
         # measure elapsed time
         end = time.time()
-        print('data_time: {.3f}s, loss: {.4f}, top1: {.2f}, top5: {.2f}'.format(
+        print('data_time: {:.4f}s, loss: {:.4f}, top1: {:.2f}, top5: {:.2f}'.format(
               data_time.avg, losses.avg, top1.avg, top5.avg))
         
 def adjust_learning_rate(optimizer, epoch, schedule):
