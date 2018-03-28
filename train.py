@@ -32,20 +32,20 @@ parser.add_argument('--nthread', default=4, type=int,
                     help='number of data loading threads (default: 4)')
 
 # Optimization options
-parser.add_argument('--epochs', default=100, type=int, metavar='N',
+parser.add_argument('--epochs', default=100, type=int,
                     help='number of total epochs to run')
-parser.add_argument('--train_batch', default=256, type=int, metavar='N',
+parser.add_argument('--train_batch', default=256, type=int,
                     help='train batchsize (default: 256)')
-parser.add_argument('--test_batch', default=200, type=int, metavar='N',
+parser.add_argument('--test_batch', default=200, type=int,
                     help='test batchsize (default: 200)')
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate')
 parser.add_argument('--schedule', default='[30, 60, 90]', type=str, 
-                        help='json list with epochs to drop lr on')
-parser.add_argument('--lr_decay_ratio', type=float, default=0.1, help='LR is multiplied by this ratio on schedule.')
-parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
-                    help='momentum')
-parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
+                    help='json list with epochs to drop lr on')
+parser.add_argument('--lr_decay_ratio', type=float, default=0.1, 
+                    help='LR is multiplied by this ratio on schedule.')
+parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
+parser.add_argument('--weight_decay', '--wd', default=1e-4, type=float,
                     help='weight decay (default: 1e-4)')
 # Checkpoints
 parser.add_argument('-c', '--checkpoint', default='checkpoint', type=str, metavar='PATH',
