@@ -101,15 +101,15 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
     # switch to train mode
     model.train()
 
+    data_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
     top5 = AverageMeter()
+    end = time.time()
     
     for batch_idx, (inputs, targets) in enumerate(train_loader):
         # measure data loading time
-        classacc.reset()
-        meter_loss.reset()
-        timer_train.reset()
+        data_time.update(time.time() - end)
 
         if use_cuda:
             inputs, targets = inputs.cuda(), targets.cuda(async=True)
@@ -129,10 +129,16 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
+        
+        # measure elapsed time
+        end = time.time()
+        print('data_time: {.3f}s, loss: {.4f}, top1: {.2f}, top5: {.2f}'.format(
+              data_time.avg, losses.avg, top1.avg, top5.avg))
+              
 def test(val_loader, model, criterion, epoch, use_cuda):
     global best_acc
 
+    data_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
     top5 = AverageMeter()
@@ -158,6 +164,11 @@ def test(val_loader, model, criterion, epoch, use_cuda):
         losses.update(loss.data[0], inputs.size(0))
         top1.update(prec1[0], inputs.size(0))
         top5.update(prec5[0], inputs.size(0))        
+        
+        # measure elapsed time
+        end = time.time()
+        print('data_time: {.3f}s, loss: {.4f}, top1: {.2f}, top5: {.2f}'.format(
+              data_time.avg, losses.avg, top1.avg, top5.avg))
         
 def adjust_learning_rate(optimizer, epoch, schedule):
     global state
