@@ -19,6 +19,7 @@ import torchvision.datasets as datasets
 import torchvision.models as models
 
 from resnet import resnet18
+from utils import AverageMeter, mkdir_p, accuracy
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
@@ -100,8 +101,9 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
     # switch to train mode
     model.train()
 
-    meter_loss = tnt.meter.AverageValueMeter()
-    classacc = tnt.meter.ClassErrorMeter(topk=[1, 5], accuracy=True)
+    losses = AverageMeter()
+    top1 = AverageMeter()
+    top5 = AverageMeter()
     
     for batch_idx, (inputs, targets) in enumerate(train_loader):
         # measure data loading time
@@ -116,18 +118,53 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
         # compute output
         outputs = model(inputs)
         loss = criterion(outputs, targets)
-
+        
         # measure accuracy and record loss
-        classacc.add(outputs.data, targets.data)
-        meter_loss.add(loss.data)
+        prec1, prec5 = accuracy(outputs.data, targets.data, topk=(1, 5))
+        losses.update(loss.data[0], inputs.size(0))
+        top1.update(prec1[0], inputs.size(0))
+        top5.update(prec5[0], inputs.size(0))
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-    train_acc = classacc.value()
-    top1, top5 = train_acc[0], train_acc[1]
+def test(val_loader, model, criterion, epoch, use_cuda):
+    global best_acc
+
+    losses = AverageMeter()
+    top1 = AverageMeter()
+    top5 = AverageMeter()
+
+    # switch to evaluate mode
+    model.eval()
+
+    end = time.time()
+    for batch_idx, (inputs, targets) in enumerate(val_loader):
+        # measure data loading time
+        data_time.update(time.time() - end)
+
+        if use_cuda:
+            inputs, targets = inputs.cuda(), targets.cuda()
+        inputs, targets = torch.autograd.Variable(inputs, volatile=True), torch.autograd.Variable(targets)
+
+        # compute output
+        outputs = model(inputs)
+        loss = criterion(outputs, targets)
+
+        # measure accuracy and record loss
+        prec1, prec5 = accuracy(outputs.data, targets.data, topk=(1, 5))
+        losses.update(loss.data[0], inputs.size(0))
+        top1.update(prec1[0], inputs.size(0))
+        top5.update(prec5[0], inputs.size(0))        
+        
+def adjust_learning_rate(optimizer, epoch):
+    global state
+    if epoch in args.schedule:
+        state['lr'] *= args.lr_decay_ratio
+        for param_group in optimizer.param_groups:
+            param_group['lr'] = state['lr']
     
   
 best_acc = 0  # best test accuracy
@@ -161,6 +198,6 @@ def main():
 
         train_loss, train_acc = train(train_loader, model, criterion, optimizer, epoch, use_cuda)
         test_loss, test_acc = test(val_loader, model, criterion, epoch, use_cuda)
-
     
-
+if __name__ == '__main__':
+    main()
