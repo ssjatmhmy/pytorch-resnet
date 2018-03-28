@@ -128,7 +128,7 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
         loss.backward()
         optimizer.step()
         
-        pbar.set_description('loss: {:.4f}, top1: {:.2f}, top5: {:.2f}'.format(
+        pbar.set_description('Train phase | loss: {:.4f}, top1: {:.2f}, top5: {:.2f}'.format(
                              losses.avg, top1.avg, top5.avg))
         pbar.refresh() # to show immediately the update
               
@@ -157,7 +157,7 @@ def test(val_loader, model, criterion, epoch, use_cuda):
         top1.update(prec1[0], inputs.size(0))
         top5.update(prec5[0], inputs.size(0))        
         
-        pbar.set_description('loss: {:.4f}, top1: {:.2f}, top5: {:.2f}'.format(
+        pbar.set_description('Val phase | loss: {:.4f}, top1: {:.2f}, top5: {:.2f}'.format(
                              losses.avg, top1.avg, top5.avg))
         pbar.refresh() # to show immediately the update
         
