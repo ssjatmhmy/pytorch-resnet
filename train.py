@@ -7,6 +7,7 @@ import json
 import shutil
 import time
 import random
+import tqdm
 
 import torch
 import torch.nn as nn
@@ -101,15 +102,12 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
     # switch to train mode
     model.train()
 
-    data_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
     top5 = AverageMeter()
-    end = time.time()
     
-    for batch_idx, (inputs, targets) in enumerate(train_loader):
-        # measure data loading time
-        data_time.update(time.time() - end)
+    pbar = tqdm.tqdm(train_loader)
+    for batch_idx, (inputs, targets) in enumerate(pbar):
 
         if use_cuda:
             inputs, targets = inputs.cuda(), targets.cuda(async=True)
@@ -130,26 +128,20 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
         loss.backward()
         optimizer.step()
         
-        # measure elapsed time
-        end = time.time()
-        print('data_time: {:.4f}s, loss: {:.4f}, top1: {:.2f}, top5: {:.2f}'.format(
-              data_time.avg, losses.avg, top1.avg, top5.avg))
+        pbar.set_description('loss: {:.4f}, top1: {:.2f}, top5: {:.2f}'.format(
+                             losses.avg, top1.avg, top5.avg))
+        pbar.refresh() # to show immediately the update
               
 def test(val_loader, model, criterion, epoch, use_cuda):
-    global best_acc
+    # switch to evaluate mode
+    model.eval()
 
-    data_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
     top5 = AverageMeter()
 
-    # switch to evaluate mode
-    model.eval()
-
-    end = time.time()
-    for batch_idx, (inputs, targets) in enumerate(val_loader):
-        # measure data loading time
-        data_time.update(time.time() - end)
+    pbar = tqdm.tqdm(val_loader)
+    for batch_idx, (inputs, targets) in enumerate(pbar):
 
         if use_cuda:
             inputs, targets = inputs.cuda(), targets.cuda()
@@ -165,10 +157,9 @@ def test(val_loader, model, criterion, epoch, use_cuda):
         top1.update(prec1[0], inputs.size(0))
         top5.update(prec5[0], inputs.size(0))        
         
-        # measure elapsed time
-        end = time.time()
-        print('data_time: {:.4f}s, loss: {:.4f}, top1: {:.2f}, top5: {:.2f}'.format(
-              data_time.avg, losses.avg, top1.avg, top5.avg))
+        pbar.set_description('loss: {:.4f}, top1: {:.2f}, top5: {:.2f}'.format(
+                             losses.avg, top1.avg, top5.avg))
+        pbar.refresh() # to show immediately the update
         
 def adjust_learning_rate(optimizer, epoch, schedule):
     global state
