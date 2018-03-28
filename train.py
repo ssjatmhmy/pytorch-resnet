@@ -159,9 +159,9 @@ def test(val_loader, model, criterion, epoch, use_cuda):
         top1.update(prec1[0], inputs.size(0))
         top5.update(prec5[0], inputs.size(0))        
         
-def adjust_learning_rate(optimizer, epoch):
+def adjust_learning_rate(optimizer, epoch, schedule):
     global state
-    if epoch in args.schedule:
+    if epoch in schedule:
         state['lr'] *= args.lr_decay_ratio
         for param_group in optimizer.param_groups:
             param_group['lr'] = state['lr']
@@ -192,7 +192,7 @@ def main():
     # Train and val
     start_epoch = 0
     for epoch in range(start_epoch, args.epochs):
-        adjust_learning_rate(optimizer, epoch)
+        adjust_learning_rate(optimizer, epoch, schedule)
 
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, args.epochs, state['lr']))
 
