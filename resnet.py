@@ -2,8 +2,8 @@
 Modified form
 https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py
 '''
-import torch.nn as nn
 import math
+import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 
 
@@ -166,14 +166,14 @@ def resnet(depth, width=1, pretrained=False, **kwargs):
     """
     if (depth not in [18, 34, 50, 101, 152]):
         raise ValueError('Choose 18, 34, 50, 101 or 152 for depth')  
-    if ((width!=1) and pretrained):
+    if ((width != 1) and pretrained):
         raise ValueError('Does not support pretrained models with width>1')
 
     name_dict = {18: 'resnet18', 34: 'resnet34', 50: 'resnet50', 101: 'resnet101', 152: 'resnet152'}
-    layers_dict = {18: [2, 2, 2, 2], 34: [3, 4, 6, 3], 50: [3, 4, 6, 3], 101: [3, 4, 23, 3], 152: [3, 8, 36, 3]}
+    layers_dict = {18: [2, 2, 2, 2], 34: [3, 4, 6, 3], 50: [3, 4, 6, 3], 
+                   101: [3, 4, 23, 3], 152: [3, 8, 36, 3]}
     block_dict = {18: BasicBlock, 34: BasicBlock, 50: Bottleneck, 101: Bottleneck, 152: Bottleneck}
     model = ResNet(block_dict[depth], layers_dict[depth], width, **kwargs)
-    if ((width==1) and pretrained):
+    if ((width == 1) and pretrained):
         model.load_state_dict(model_zoo.load_url(model_urls[name_dict[depth]]))
     return model
-
