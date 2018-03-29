@@ -131,6 +131,8 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
         pbar.set_description('Train phase | loss: {:.4f}, top1: {:.2f}, top5: {:.2f}'.format(
                              losses.avg, top1.avg, top5.avg))
         pbar.refresh() # to show immediately the update
+        
+    return (losses.avg, top1.avg)
               
 def test(val_loader, model, criterion, epoch, use_cuda):
     # switch to evaluate mode
@@ -161,6 +163,8 @@ def test(val_loader, model, criterion, epoch, use_cuda):
                              losses.avg, top1.avg, top5.avg))
         pbar.refresh() # to show immediately the update
         
+    return (losses.avg, top1.avg)
+      
 def adjust_learning_rate(optimizer, epoch, schedule):
     global state
     if epoch in schedule:
@@ -168,9 +172,10 @@ def adjust_learning_rate(optimizer, epoch, schedule):
         for param_group in optimizer.param_groups:
             param_group['lr'] = state['lr']
     
-  
-best_acc = 0  # best test accuracy
-
+def save_checkpoint(state, is_best, checkpoint='checkpoint', filename='checkpoint.pth.tar'):
+    filepath = os.path.join(checkpoint, filename)
+    torch.save(state, filepath)
+    
 def main():
     global best_acc
     
@@ -183,7 +188,9 @@ def main():
     train_loader, val_loader = create_iterators()
     
     # create model
-    model = resnet18()
+    if args.pretrained:
+        print('=> using pre-trained model')
+    model = resnet18(pretrained=args.pretrained)
     model = torch.nn.DataParallel(model).cuda()
     print('    Total params: %.2fM' % (sum(p.numel() for p in model.parameters())/1000000.0))
     
@@ -191,8 +198,27 @@ def main():
     criterion = nn.CrossEntropyLoss().cuda()
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
 
-    # Train and val
+    # Resume
+    if args.resume:
+        # Load checkpoint.
+        print('==> Resuming from checkpoint..')
+        assert os.path.isfile(args.resume), 'Error: no checkpoint directory found!'
+        args.checkpoint = os.path.dirname(args.resume)
+        checkpoint = torch.load(args.resume)
+        start_epoch = checkpoint['epoch']
+        model.load_state_dict(checkpoint['state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer'])    
+
     start_epoch = 0
+
+    # Evaluate
+    if args.evaluate:
+        print('\nEvaluation only')
+        test_loss, test_acc = test(val_loader, model, criterion, start_epoch, use_cuda)
+        print(' Test Loss:  %.4f, Test Acc:  %.2f' % (test_loss, test_acc))
+        return        
+    
+    # Train and val
     for epoch in range(start_epoch, args.epochs):
         adjust_learning_rate(optimizer, epoch, schedule)
 
@@ -200,6 +226,14 @@ def main():
 
         train_loss, train_acc = train(train_loader, model, criterion, optimizer, epoch, use_cuda)
         test_loss, test_acc = test(val_loader, model, criterion, epoch, use_cuda)
+  
+        # save model
+        save_checkpoint({
+                'epoch': epoch + 1,
+                'state_dict': model.state_dict(),
+                'acc': test_acc,
+                'optimizer' : optimizer.state_dict(),
+        }, checkpoint=args.checkpoint, filename='resnet'+str(args.depth)+'_'+str(epoch+1)'.pt7')
     
 if __name__ == '__main__':
     main()
