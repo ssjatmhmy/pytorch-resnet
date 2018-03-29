@@ -19,7 +19,7 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
 
-from resnet import resnet18
+from resnet import resnet
 from utils import AverageMeter, mkdir_p, accuracy
 
 # Parse arguments
@@ -27,7 +27,7 @@ parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 
 # Model options
 parser.add_argument('--depth', default=18, type=int)
-parser.add_argument('--widen', default=1, type=float, help='widen factor')
+parser.add_argument('--width', default=1, type=float, help='widen factor')
 parser.add_argument('--data', default='path to dataset', type=str)
 parser.add_argument('--nthread', default=4, type=int,
                     help='number of data loading threads (default: 4)')
@@ -190,7 +190,7 @@ def main():
     # create model
     if args.pretrained:
         print('=> using pre-trained model')
-    model = resnet18(pretrained=args.pretrained)
+    model = resnet(args.depth, args.width, pretrained=args.pretrained)
     model = torch.nn.DataParallel(model).cuda()
     print('    Total params: %.2fM' % (sum(p.numel() for p in model.parameters())/1000000.0))
     
