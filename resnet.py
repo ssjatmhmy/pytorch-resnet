@@ -122,6 +122,7 @@ class ResNet(nn.Module):
                 m.bias.data.zero_()
 
     def _make_layer(self, block, planes, blocks, stride=1):
+        planes = int(round(planes))
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
@@ -172,7 +173,7 @@ def resnet(depth, width=1, pretrained=False, **kwargs):
     layers_dict = {18: [2, 2, 2, 2], 34: [3, 4, 6, 3], 50: [3, 4, 6, 3], 101: [3, 4, 23, 3], 152: [3, 8, 36, 3]}
     block_dict = {18: BasicBlock, 34: BasicBlock, 50: Bottleneck, 101: Bottleneck, 152: Bottleneck}
     model = ResNet(block_dict[depth], layers_dict[depth], width, **kwargs)
-    if ((width==1) and pretrained)::
+    if ((width==1) and pretrained):
         model.load_state_dict(model_zoo.load_url(model_urls[name_dict[depth]]))
     return model
 
