@@ -161,7 +161,7 @@ def resnet(depth, width=1, pretrained=False, **kwargs):
     """Constructs a ResNet model.
     Args:
         depth (int): choose 18, 34, 50, 101, 152
-        width (int): widen factor for intermediate layers of resnet
+        width (float): widen factor for intermediate layers of resnet
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
     if (depth not in [18, 34, 50, 101, 152]):
