@@ -233,7 +233,7 @@ def main():
                 'state_dict': model.state_dict(),
                 'acc': test_acc,
                 'optimizer' : optimizer.state_dict(),
-        }, checkpoint=args.checkpoint, filename='resnet'+str(args.depth)+'_'+str(epoch+1)'.pt7')
+        }, checkpoint=args.checkpoint, filename='resnet'+str(args.depth)+'_'+str(epoch+1)+'.pt7')
     
 if __name__ == '__main__':
     main()
