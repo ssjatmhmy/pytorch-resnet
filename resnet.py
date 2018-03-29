@@ -1,5 +1,5 @@
 '''Resnet nn.Module.
-Ported form
+Modified form
 https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py
 '''
 import torch.nn as nn
