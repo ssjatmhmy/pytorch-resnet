@@ -198,6 +198,8 @@ def main():
     criterion = nn.CrossEntropyLoss().cuda()
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
 
+    start_epoch = 0
+    
     # Resume
     if args.resume:
         # Load checkpoint.
@@ -208,8 +210,6 @@ def main():
         start_epoch = checkpoint['epoch']
         model.load_state_dict(checkpoint['state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer'])    
-
-    start_epoch = 0
 
     # Evaluate
     if args.evaluate:
