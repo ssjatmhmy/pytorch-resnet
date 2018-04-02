@@ -21,6 +21,7 @@ import torchvision.models as models
 
 from resnet import resnet
 from utils import AverageMeter, mkdir_p, accuracy
+from count_ops_and_params import measure_model
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
@@ -191,8 +192,12 @@ def main():
     if args.pretrained:
         print('=> using pre-trained model')
     model = resnet(args.depth, args.width, pretrained=args.pretrained)
+    
+    n_flops, _ = measure_model(model)
+    print('    Total flops: %.4fG' % n_flops/1e9)
+
     model = torch.nn.DataParallel(model).cuda()
-    print('    Total params: %.2fM' % (sum(p.numel() for p in model.parameters())/1000000.0))
+    print('    Total params: %.2fM' % (sum(p.numel() for p in model.parameters())/1e6))
     
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda()
