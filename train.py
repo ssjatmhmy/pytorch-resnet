@@ -192,13 +192,10 @@ def main():
     if args.pretrained:
         print('=> using pre-trained model')
     model = resnet(args.depth, args.width, pretrained=args.pretrained)
-    
     n_flops, n_params = measure_model(model, 224, 224)
     print('    Total flops: %.4fG' % (n_flops/1e9))
     print('    Total params: %.2fM' % (n_params/1e6))
-
     model = torch.nn.DataParallel(model).cuda()
-    print('    Total params: %.2fM' % (sum(p.numel() for p in model.parameters())/1e6))
     
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda()
