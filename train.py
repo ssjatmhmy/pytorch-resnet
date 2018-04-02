@@ -193,7 +193,7 @@ def main():
         print('=> using pre-trained model')
     model = resnet(args.depth, args.width, pretrained=args.pretrained)
     
-    n_flops, _ = measure_model(model)
+    n_flops, _ = measure_model(model, 224, 224)
     print('    Total flops: %.4fG' % n_flops/1e9)
 
     model = torch.nn.DataParallel(model).cuda()
