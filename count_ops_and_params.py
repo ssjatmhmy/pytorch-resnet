@@ -1,8 +1,6 @@
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-from functools import reduce
-import operator
 
 
 count_ops = 0
@@ -32,7 +30,7 @@ def get_layer_info(layer):
 
 
 def get_layer_param(model):
-    return sum([reduce(operator.mul, i.size(), 1) for i in model.parameters()])
+    return sum(p.numel() for p in model.parameters())
 
 
 ### The input batch size should be 1 to call this function
@@ -75,7 +73,7 @@ def measure_layer(layer, x):
         delta_params = get_layer_param(layer)
 
     ### ops_nothing
-    elif type_name in ['BatchNorm2d', 'Dropout2d']:
+    elif type_name in ['BatchNorm2d', 'Dropout2d', 'MaxPool2d']:
         delta_params = get_layer_param(layer)
 
     ### unknown layer type
