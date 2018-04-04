@@ -29,6 +29,8 @@ parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 # Model options
 parser.add_argument('--depth', default=18, type=int)
 parser.add_argument('--width', default=1, type=float, help='widen factor')
+parser.add_argument('--show_flops', dest='show_flops', action='store_true',
+                    help='count number of flops and parameters, and then exit')
 parser.add_argument('--data', default='path to dataset', type=str)
 parser.add_argument('--nthread', default=4, type=int,
                     help='number of data loading threads (default: 4)')
@@ -192,9 +194,14 @@ def main():
     if args.pretrained:
         print('=> using pre-trained model')
     model = resnet(args.depth, args.width, pretrained=args.pretrained)
-    n_flops, n_params = measure_model(model, 224, 224)
-    print('    Total flops: %.4fG' % (n_flops/1e9))
-    print('    Total params: %.2fM' % (n_params/1e6))
+    
+    # count flops and parameters
+    if args.show_flops:    
+        n_flops, n_params = measure_model(model, 224, 224)
+        print('    Total flops: %.4fG' % (n_flops/1e9))
+        print('    Total params: %.2fM' % (n_params/1e6))
+        exit(0)    
+
     model = torch.nn.DataParallel(model).cuda()
     
     # define loss function (criterion) and optimizer
